@@ -15,3 +15,7 @@ type User struct {
 	UpdatedAt   time.Time  `json:"updated_at"`
 	DeletedAt   *time.Time `sql:"index" json:"deleted_at"`
 }
+
+func (User) TableName() string {
+  return "kc_users"
+}

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/url"
+	"os"
 
 	"github.com/arifseft/clean-architecture-sample/pkg/user"
 	"github.com/jinzhu/gorm"
@@ -43,6 +44,7 @@ func main() {
 		ValidateUnknownMigrations: false,
 	}
 
+
 	m := gormigrate.New(db, &options, []*gormigrate.Migration{
 		{
 			ID: "2020_07_16_132137_create_table_users",
@@ -50,13 +52,26 @@ func main() {
 				return tx.AutoMigrate(&user.User{}).Error
 			},
 			Rollback: func(tx *gorm.DB) error {
-				return tx.DropTable("users").Error
+				return tx.DropTable(&user.User{}).Error
 			},
 		},
 	})
 
-	if err = m.Migrate(); err != nil {
-		log.Fatalf("Could not migrate: %v", err)
+	args := os.Args[1:]
+	if len(args) > 0 {
+		if args[0] == "rollback" {
+			if err = m.RollbackLast(); err != nil {
+				log.Fatalf("Could not rollback: %v", err)
+			}
+			log.Printf("RollbackLast did run successfully")
+		} else {
+			log.Printf("wrong command")
+		}
+	} else {
+
+		if err = m.Migrate(); err != nil {
+			log.Fatalf("Could not migrate: %v", err)
+		}
+		log.Printf("Migration did run successfully")
 	}
-	log.Printf("Migration did run successfully")
 }
