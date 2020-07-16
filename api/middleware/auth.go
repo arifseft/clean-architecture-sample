@@ -5,8 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/L04DB4L4NC3R/jobs-mhrd/api/views"
-	pkg "github.com/L04DB4L4NC3R/jobs-mhrd/pkg"
+	"github.com/arifseft/clean-architecture-sample/api/views"
 	jwtmiddleware "github.com/auth0/go-jwt-middleware"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
@@ -23,7 +22,7 @@ func Validate(h http.Handler) http.Handler {
 	return jwtMiddleware.Handler(h)
 }
 
-func ValidateAndGetClaims(ctx context.Context, role string) (map[string]interface{}, error) {
+func ValidateAndGetClaims(ctx context.Context) (map[string]interface{}, error) {
 
 	token, ok := ctx.Value("user").(*jwt.Token)
 	if !ok {
@@ -42,9 +41,5 @@ func ValidateAndGetClaims(ctx context.Context, role string) (map[string]interfac
 		return nil, views.ErrInvalidToken
 	}
 
-	if claims["role"].(string) != role {
-		log.Println(claims["role"])
-		return nil, pkg.ErrUnauthorized
-	}
 	return claims, nil
 }

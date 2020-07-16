@@ -2,8 +2,9 @@ package user
 
 import (
 	"context"
+	"time"
 
-	pkg "github.com/L04DB4L4NC3R/jobs-mhrd/pkg"
+	pkg "github.com/arifseft/clean-architecture-sample/pkg"
 	"github.com/jinzhu/gorm"
 )
 
@@ -11,7 +12,7 @@ type repo struct {
 	DB *gorm.DB
 }
 
-func NewPostgresRepo(db *gorm.DB) Repository {
+func NewMysqlRepo(db *gorm.DB) Repository {
 	return &repo{
 		DB: db,
 	}
@@ -24,12 +25,14 @@ func (r *repo) FindByID(ctx context.Context, id uint) (user *User, err error) {
 
 func (r *repo) BuildProfile(ctx context.Context, user *User) (u *User, err error) {
 
+	user.UpdatedAt = time.Now()
 	result := r.DB.Table("users").Where("email = ?", user.Email).Updates(map[string]interface{}{
 		"first_name":   user.FirstName,
 		"last_name":    user.LastName,
 		"phone_number": user.PhoneNumber,
 		"address":      user.Address,
 		"display_pic":  user.DisplayPic,
+		"updated_at":   user.UpdatedAt,
 	})
 
 	if result.Error != nil {
@@ -46,12 +49,14 @@ func (r *repo) BuildProfile(ctx context.Context, user *User) (u *User, err error
 	}
 }
 
-func (r *repo) CreateMinimal(ctx context.Context, email, password, phoneNumber string) (u *User, err error) {
+func (r *repo) CreateMinimal(ctx context.Context, firstName, lastName, email, password, phoneNumber string) (u *User, err error) {
 
 	u = &User{
+		FirstName:   firstName,
+		LastName:    lastName,
 		Email:       email,
 		Password:    password,
-		PhoneNumber: phoneNumber,
+		PhoneNumber: &phoneNumber,
 	}
 	result := r.DB.Create(u)
 	if result.Error != nil {
@@ -88,7 +93,7 @@ func (r *repo) DoesEmailExist(ctx context.Context, email string) (doesEmailExist
 func (r *repo) FindByEmail(ctx context.Context, email string) (u *User, err error) {
 
 	u = &User{}
-	projection := "email, created_at, updated_at, deleted_at, phone_number, first_name, last_name, address, display_pic"
+	projection := "id, email, created_at, updated_at, deleted_at, phone_number, first_name, last_name, address, display_pic"
 	result := r.DB.Select(projection).Where("email = ?", email).First(u)
 
 	switch result.Error {

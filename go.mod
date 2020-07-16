@@ -1,7 +1,7 @@
 // +heroku install ./api/main.go
-module github.com/L04DB4L4NC3R/jobs-mhrd
+module github.com/arifseft/clean-architecture-sample
 
-go 1.13
+go 1.14
 
 require (
 	github.com/auth0/go-jwt-middleware v0.0.0-20190805220309-36081240882b
@@ -30,5 +30,6 @@ require (
 	github.com/valyala/fasttemplate v1.1.0 // indirect
 	golang.org/x/sys v0.0.0-20191027211539-f8518d3b3627 // indirect
 	golang.org/x/text v0.3.2 // indirect
+	gopkg.in/gormigrate.v1 v1.6.0 // indirect
 	gopkg.in/urfave/cli.v2 v2.0.0-20190806201727-b62605953717 // indirect
 )

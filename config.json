@@ -11,11 +11,11 @@
 		"key_path": ""
 	},
 	"database_dev": {
-		"host": "127.0.0.1",
-		"port": "5432",
-		"user": "angad",
-		"password": "1234",
-		"dbname": "mhrd",
+		"host": "localhost",
+		"port": "3306",
+		"user": "root",
+		"password": "12345678",
+		"dbname": "clean_architecture_sample",
 		"sslmode": "disable"
 	},
 	"database_prod": {

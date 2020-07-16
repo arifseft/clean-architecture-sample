@@ -8,7 +8,7 @@ import (
 )
 
 type Service interface {
-	Register(ctx context.Context, email, password, phoneNumber string) (*User, error)
+	Register(ctx context.Context, user *User) (*User, error)
 
 	Login(ctx context.Context, email, password string) (*User, error)
 
@@ -33,9 +33,9 @@ func NewService(r Repository) Service {
 	}
 }
 
-func (s *service) Register(ctx context.Context, email, password, phoneNumber string) (u *User, err error) {
+func (s *service) Register(ctx context.Context, user *User) (u *User, err error) {
 
-	exists, err := s.repo.DoesEmailExist(ctx, email)
+	exists, err := s.repo.DoesEmailExist(ctx, user.Email)
 	if err != nil {
 		return nil, err
 	}
@@ -44,9 +44,9 @@ func (s *service) Register(ctx context.Context, email, password, phoneNumber str
 	}
 
 	hasher := md5.New()
-	hasher.Write([]byte(password))
+	hasher.Write([]byte(user.Password))
 
-	return s.repo.CreateMinimal(ctx, email, hex.EncodeToString(hasher.Sum(nil)), phoneNumber)
+	return s.repo.CreateMinimal(ctx, user.FirstName, user.LastName, user.Email, hex.EncodeToString(hasher.Sum(nil)), *user.PhoneNumber)
 }
 
 func (s *service) Login(ctx context.Context, email, password string) (u *User, err error) {

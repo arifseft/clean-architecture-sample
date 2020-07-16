@@ -7,7 +7,7 @@ import (
 
 	log "github.com/sirupsen/logrus"
 
-	pkg "github.com/L04DB4L4NC3R/jobs-mhrd/pkg"
+	pkg "github.com/arifseft/clean-architecture-sample/pkg"
 )
 
 type ErrView struct {

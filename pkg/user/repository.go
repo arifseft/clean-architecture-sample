@@ -9,7 +9,7 @@ type Repository interface {
 
 	BuildProfile(ctx context.Context, user *User) (*User, error)
 
-	CreateMinimal(ctx context.Context, email, password, phoneNumber string) (*User, error)
+	CreateMinimal(ctx context.Context, firstName, lastName, email, password, phoneNumber string) (*User, error)
 
 	FindByEmailAndPassword(ctx context.Context, email, password string) (*User, error)
 

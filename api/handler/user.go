@@ -4,9 +4,9 @@ import (
 	"encoding/json"
 	"net/http"
 
-	"github.com/L04DB4L4NC3R/jobs-mhrd/api/middleware"
-	"github.com/L04DB4L4NC3R/jobs-mhrd/api/views"
-	"github.com/L04DB4L4NC3R/jobs-mhrd/pkg/user"
+	"github.com/arifseft/clean-architecture-sample/api/middleware"
+	"github.com/arifseft/clean-architecture-sample/api/views"
+	"github.com/arifseft/clean-architecture-sample/pkg/user"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/spf13/viper"
 )
@@ -24,7 +24,7 @@ func register(svc user.Service) http.Handler {
 			return
 		}
 
-		u, err := svc.Register(r.Context(), user.Email, user.Password, user.PhoneNumber)
+		u, err := svc.Register(r.Context(), &user)
 		if err != nil {
 			views.Wrap(err, w)
 			return
@@ -33,7 +33,6 @@ func register(svc user.Service) http.Handler {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"email": u.Email,
 			"id":    u.ID,
-			"role":  "user",
 		})
 		tokenString, err := token.SignedString([]byte(viper.GetString("jwt_secret")))
 		if err != nil {
@@ -69,7 +68,6 @@ func login(svc user.Service) http.Handler {
 		token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 			"email": u.Email,
 			"id":    u.ID,
-			"role":  "user",
 		})
 		tokenString, err := token.SignedString([]byte(viper.GetString("jwt_secret")))
 		if err != nil {
@@ -96,7 +94,7 @@ func profile(svc user.Service) http.Handler {
 				return
 			}
 
-			claims, err := middleware.ValidateAndGetClaims(r.Context(), "user")
+			claims, err := middleware.ValidateAndGetClaims(r.Context())
 			if err != nil {
 				views.Wrap(err, w)
 				return
@@ -113,7 +111,7 @@ func profile(svc user.Service) http.Handler {
 		} else if r.Method == http.MethodGet {
 
 			// @description view profile
-			claims, err := middleware.ValidateAndGetClaims(r.Context(), "user")
+			claims, err := middleware.ValidateAndGetClaims(r.Context())
 			if err != nil {
 				views.Wrap(err, w)
 				return
@@ -145,7 +143,7 @@ func changePassword(svc user.Service) http.Handler {
 				return
 			}
 
-			claims, err := middleware.ValidateAndGetClaims(r.Context(), "user")
+			claims, err := middleware.ValidateAndGetClaims(r.Context())
 			if err != nil {
 				views.Wrap(err, w)
 				return
@@ -154,6 +152,10 @@ func changePassword(svc user.Service) http.Handler {
 				views.Wrap(err, w)
 				return
 			}
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"message": "password changed",
+			})
+			return
 			return
 		} else {
 			views.Wrap(views.ErrMethodNotAllowed, w)

@@ -3,16 +3,16 @@ package main
 import (
 	"fmt"
 	"net/http"
+	"net/url"
 	"os"
 	"time"
 
-	"github.com/L04DB4L4NC3R/jobs-mhrd/api/handler"
-	"github.com/L04DB4L4NC3R/jobs-mhrd/api/middleware"
-	"github.com/L04DB4L4NC3R/jobs-mhrd/pkg/admin"
-	"github.com/L04DB4L4NC3R/jobs-mhrd/pkg/user"
+	"github.com/arifseft/clean-architecture-sample/api/handler"
+	"github.com/arifseft/clean-architecture-sample/api/middleware"
+	"github.com/arifseft/clean-architecture-sample/pkg/user"
 	"github.com/gorilla/handlers"
 	"github.com/jinzhu/gorm"
-	_ "github.com/jinzhu/gorm/dialects/postgres"
+	_ "github.com/jinzhu/gorm/dialects/mysql"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
@@ -32,10 +32,19 @@ func init() {
 func dbConnect(host, port, user, dbname, password, sslmode string) (*gorm.DB, error) {
 
 	// In the case of heroku
-	if os.Getenv("DATABASE_URL") != "" {
-		return gorm.Open("postgres", os.Getenv("DATABASE_URL"))
+	// if os.Getenv("DATABASE_URL") != "" {
+	//     return gorm.Open("mysql", os.Getenv("DATABASE_URL"))
+	// }
+
+	connection := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s", user, password, host, port, dbname)
+	val := url.Values{}
+	val.Add("parseTime", "true")
+	val.Add("loc", "Asia/Jakarta")
+	dsn := fmt.Sprintf("%s?%s", connection, val.Encode())
+	db, err := gorm.Open(`mysql`, dsn)
+	if err != nil {
+		log.Fatal(err)
 	}
-	db, err := gorm.Open("postgres", fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", host, port, user, dbname, password, sslmode))
 
 	return db, err
 }
@@ -60,20 +69,17 @@ func main() {
 	log.Println("Connected to the database")
 
 	// migrations
-	db.AutoMigrate(&user.User{}, &admin.Admin{})
+	// db.AutoMigrate(&user.User{})
 
 	// initializing repos and services
-	userRepo := user.NewPostgresRepo(db)
-	adminRepo := admin.NewPostgresRepo(db)
+	userRepo := user.NewMysqlRepo(db)
 
 	userSvc := user.NewService(userRepo)
-	adminSvc := admin.NewService(adminRepo)
 
 	// Initializing handlers
 	r := http.NewServeMux()
 
 	handler.MakeUserHandler(r, userSvc)
-	handler.MakeAdminHandler(r, adminSvc)
 
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
